@@ -58,7 +58,7 @@ exports.readFile = (filename, options, callback) ->
 
   return
 
-# read file from oss
+# write data to oss
 # @param {String} bucketName
 # @param {String} filename
 # @param {String | Buffer} data
@@ -81,5 +81,35 @@ exports.writeFile = (filename, data, callback) ->
 
   return
 
+# upload a local file to oss bucket
+# @param {String} filename
+# @param {String} pathToFile
+# @param {Function} callback
+exports.uploadFile = (filename, pathToFile, callback) ->
+  return throw new Error "Please run oss-easy.init() first" unless oss?
 
+  args =
+    bucket: TARGET_BUCKET
+    object: filename
+    srcFile: pathToFile
+
+  oss.putObject args, callback
+
+  return
+
+# upload a local file to oss bucket
+# @param {String} filename
+# @param {String} pathToFile
+# @param {Function} callback
+exports.downloadFile = (filename, pathToFile, callback) ->
+  return throw new Error "Please run oss-easy.init() first" unless oss?
+
+  args =
+    bucket: TARGET_BUCKET
+    object: filename
+    dstFile: pathToFile
+
+  oss.getObject args, callback
+
+  return
 

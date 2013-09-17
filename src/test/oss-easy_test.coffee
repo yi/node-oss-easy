@@ -1,9 +1,12 @@
 require 'mocha'
 should = require('chai').should()
 oss = require "../oss-easy"
+fs = require "fs"
 
 
 STRING_CONTENT_FOR_TESTING = "just a piece of data"
+
+STRING_CONTENT_FOR_TESTING2 = "222 just a piece of data 222"
 
 
 describe "testing oss", (done)->
@@ -18,4 +21,19 @@ describe "testing oss", (done)->
       oss.readFile filename, 'utf8', (err, data)->
         data.should.equal STRING_CONTENT_FOR_TESTING
         done()
+
+  it "uploadFile and downloadFile should work", (done)->
+    pathToTempFile = "/tmp/#{Date.now()}"
+    pathToTempFile2 = "/tmp/#{Date.now()}-back"
+    fs.writeFileSync pathToTempFile, STRING_CONTENT_FOR_TESTING2
+
+    filename = "test-file-upload-download"
+
+    oss.uploadFile filename, pathToTempFile, (err) ->
+      should.not.exist(err)
+      oss.downloadFile filename, pathToTempFile2, (err) ->
+        should.not.exist(err)
+        fs.readFileSync(pathToTempFile2, 'utf8').should.equal(fs.readFileSync(pathToTempFile, 'utf8'))
+        done()
+
 
