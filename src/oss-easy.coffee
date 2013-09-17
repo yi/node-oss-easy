@@ -24,6 +24,8 @@ exports.init = (key, secret, bucketName) ->
   unless _.isString(key) and _.isString(secret) and _.isString(bucketName) and key.length > 0 and secret.length > 0 and bucketName.length > 0
     return throw new Error "Invalid arguments. key:#{key}, secret:#{secret}"
 
+  TARGET_BUCKET = bucketName
+
   oss = new ossAPI.OssClient
     accessKeyId: key
     accessKeySecret: secret
@@ -40,6 +42,7 @@ exports.readFile = (filename, options, callback) ->
 
   pathToTempFile = "/tmp/#{generateRandomId()}"
 
+  #console.log "pathToTempFile:#{pathToTempFile}"
   args =
     bucket: TARGET_BUCKET
     object: filename
@@ -60,7 +63,7 @@ exports.readFile = (filename, options, callback) ->
 # @param {String} filename
 # @param {String | Buffer} data
 # @param {Function} callback
-exports.writeFile(filename, data, callback) ->
+exports.writeFile = (filename, data, callback) ->
   return throw new Error "Please run oss-easy.init() first" unless oss?
 
   pathToTempFile = "/tmp/#{generateRandomId()}"
