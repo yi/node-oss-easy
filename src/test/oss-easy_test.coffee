@@ -1,6 +1,6 @@
 require 'mocha'
 should = require('chai').should()
-oss = require "../oss-easy"
+oss_easy = require "../oss-easy"
 fs = require "fs"
 
 
@@ -8,10 +8,9 @@ STRING_CONTENT_FOR_TESTING = "just a piece of data"
 
 STRING_CONTENT_FOR_TESTING2 = "222 just a piece of data 222"
 
+oss = oss_easy.init("T2ddFoapcbkps1S7", "0ByL2vqAnG17F4k6auJLiKd1kcu7xu", "testdrive")
 
 describe "testing oss", (done)->
-  before ()->
-    oss.init("T2ddFoapcbkps1S7", "0ByL2vqAnG17F4k6auJLiKd1kcu7xu", "testdrive")
 
   it "writeFile and readFile should work", (done)->
     filename = "just-a-test"
