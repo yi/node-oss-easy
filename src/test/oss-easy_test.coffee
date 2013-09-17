@@ -35,4 +35,19 @@ describe "testing oss", (done)->
         fs.readFileSync(pathToTempFile2, 'utf8').should.equal(fs.readFileSync(pathToTempFile, 'utf8'))
         done()
 
+  it "uploadFile in a batch should work", (done)->
+    filenames= [
+      "#{Date.now()}-t1",
+      "#{Date.now()}-t2",
+      "#{Date.now()}-t3",
+      "#{Date.now()}-t4"]
+
+    for i in [0...4] by 1
+      fs.writeFileSync "/tmp/#{filenames[i]}", "#{STRING_CONTENT_FOR_TESTING2}-#{i}"
+
+    oss.uploadFileBatch filenames, "/tmp", (err)->
+      should.not.exist(err)
+      done()
+
+
 

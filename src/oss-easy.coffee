@@ -9,6 +9,8 @@
 _ = require "underscore"
 ossAPI = require 'oss-client'
 fs = require "fs"
+async = require "async"
+path = require "path"
 
 generateRandomId = ->
   return "#{(Math.random() * 36 >> 0).toString(36)}#{(Math.random() * 36 >> 0).toString(36)}#{Date.now().toString(36)}"
@@ -80,6 +82,14 @@ class OssEasy
       srcFile: pathToFile
 
     @oss.putObject args, callback
+
+    return
+
+  # upload multiple files in a batch
+  uploadFileBatch : (filenames, basePath, callback) ->
+    async.eachSeries filenames, (filename, eachCallback)=>
+      @uploadFile filename, path.join(basePath, filename), eachCallback
+    , callback
 
     return
 
