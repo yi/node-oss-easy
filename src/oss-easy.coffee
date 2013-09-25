@@ -87,6 +87,11 @@ class OssEasy
 
   # upload multiple files in a batch
   uploadFileBatch : (filenames, basePath, callback) ->
+    unless Array.isArray filenames
+      err = "bad argument, filenames:#{filenames}"
+      console.error "[oss-easy::uploadFilesd] #{err}"
+      callback(err)
+      return
     async.eachSeries filenames, (filename, eachCallback)=>
       @uploadFile filename, path.join(basePath, filename), eachCallback
     , callback
@@ -104,6 +109,30 @@ class OssEasy
       dstFile: pathToFile
 
     @oss.getObject args, callback
+
+    return
+
+  # delete a single file from oss bucket
+  # @param {String} filename
+  deleteFile : (filename, callback) ->
+    args =
+      bucket: @targetBucket
+      object: filename
+
+    @oss.deleteObject args, callback
+    return
+
+  # delete a single file from oss bucket
+  # @param {String} filename
+  deleteFileBatch : (filenames, callback) ->
+    unless Array.isArray filenames
+      err = "bad argument, filenames:#{filenames}"
+      console.error "[oss-easy::deleteFileBatch] #{err}"
+      callback(err)
+      return
+    async.eachSeries filenames, (filename, eachCallback)=>
+      @deleteFile filename, eachCallback
+    , callback
 
     return
 
