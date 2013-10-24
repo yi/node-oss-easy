@@ -1,7 +1,7 @@
 {
   "name": "oss-easy",
   "description": "an aliyun oss service client for nodejs, exposes api more like nodejs.fs",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "homepage": "https://github.com/yi/node-oss-easy",
   "author": {
     "name": "yi",

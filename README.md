@@ -1,6 +1,7 @@
 # oss-easy
 
 an aliyun oss service client for nodejs, exposes api more like the file system module of Node.JS
+一个阿里云 OSS 服务的 Node.JS 模块，提供类似 fs 的 API。同时提供一些方便的批量操作方法
 
 ## Getting Started
 Install the module with: `npm install oss-easy`
