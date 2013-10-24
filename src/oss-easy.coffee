@@ -86,12 +86,25 @@ class OssEasy
     return
 
   # upload multiple files in a batch
+  # @param {String[]} filenames, an array contain all filenames
   uploadFileBatch : (filenames, basePath, callback) ->
     unless Array.isArray filenames
       err = "bad argument, filenames:#{filenames}"
       console.error "[oss-easy::uploadFilesd] #{err}"
       callback(err)
       return
+
+    if _.isFunction(basePath) and not callback?
+      callback = basePath
+      basePath = null
+
+    if _.isString(basePath)
+      for filename, i in filenames
+        filenames[i] = path.join(basePath, filename)
+
+    # here
+
+
     async.eachSeries filenames, (filename, eachCallback)=>
       @uploadFile filename, path.join(basePath, filename), eachCallback
     , callback
