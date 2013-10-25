@@ -35,7 +35,7 @@ class OssEasy
 
     @downloadFile filename, pathToTempFile, (err) ->
       if err?
-        callback(err)
+        callback(err) if _.isFunction callback
       else
         fs.readFile pathToTempFile, options, callback
 
@@ -53,7 +53,7 @@ class OssEasy
 
     fs.writeFile pathToTempFile, data, (err)=>
       if err?
-        return callback(err)
+        return callback(err) if _.isFunction callback
       else
         @uploadFile filename, pathToTempFile, callback
     return
@@ -80,8 +80,8 @@ class OssEasy
   uploadFileBatch : (filenames, basePath, callback) ->
     unless Array.isArray filenames
       err = "bad argument, filenames:#{filenames}"
-      console.error "[oss-easy::uploadFilesd] #{err}"
-      callback(err)
+      console.error "[oss-easy::uploadFileBatch] #{err}"
+      callback(err) if _.isFunction callback
       return
 
     if _.isFunction(basePath) and not callback?
@@ -115,6 +115,23 @@ class OssEasy
 
     return
 
+  # upload a local file to oss bucket
+  # @param {String} filename
+  # @param {String} basePath
+  # @param {Function} callback
+  downloadFileBatch : (filenames, basePath, callback) ->
+    unless Array.isArray(filenames) and _.isString(basePath) and basePath.length > 0
+      err = "bad argument, filenames:#{filenames}"
+      console.error "[oss-easy::downloadFileBatch] #{err}"
+      callback(err) if _.isFunction(callback)
+      return
+
+    async.eachSeries filenames, (filename, eachCallback)=>
+      @downloadFile filename, path.join(basePath, filename), eachCallback
+    , callback
+
+    return
+
   # delete a single file from oss bucket
   # @param {String} filename
   deleteFile : (filename, callback) ->
@@ -133,7 +150,7 @@ class OssEasy
     unless Array.isArray filenames
       err = "bad argument, filenames:#{filenames}"
       console.error "[oss-easy::deleteFileBatch] #{err}"
-      callback(err)
+      callback(err) if _.isFunction callback
       return
     async.eachSeries filenames, (filename, eachCallback)=>
       @deleteFile filename, eachCallback

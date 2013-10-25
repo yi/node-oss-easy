@@ -65,6 +65,22 @@ describe "testing oss", (done)->
       should.not.exist(err)
       done()
 
+  it "download file in a batch should work", (done)->
+
+    for i in [0...4] by 1
+      fs.writeFileSync "/tmp/#{FILE_NAMES[i]}-i.tmp", "#{STRING_CONTENT_FOR_TESTING2}-#{i}"
+
+    filenames = FILE_NAMES.concat()
+    for filename, i in filenames
+      filenames[i] = "#{filename}-i.tmp"
+
+    pathToDownload = path.join "/tmp", "batch-download"
+
+    fs.mkdirSync(pathToDownload) unless fs.existsSync(pathToDownload)
+
+    oss.downloadFileBatch filenames, pathToDownload, (err)->
+      should.not.exist(err)
+      done()
 
   it "delete file should work", (done)->
     filename = "just-a-test"
