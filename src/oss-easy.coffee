@@ -29,17 +29,7 @@ class OssEasy
   # @param {Object} [options] , refer to [options] of fs.readFile
   # @param {Function} callback
   readFile : (filename, options, callback) ->
-    pathToTempFile = "/tmp/#{generateRandomId()}"
-
-    #console.log "pathToTempFile:#{pathToTempFile}"
-    #args =
-      #bucket: @targetBucket
-      #object: filename
-      #dstFile: pathToTempFile
-
-    #callback = options if not callback? and _.isFunction(options)
-
-    #oss.getObject args, (err)->
+    pathToTempFile = path.join "/tmp/", generateRandomId()
 
     @downloadFile filename, pathToTempFile, (err) ->
       if err?
@@ -55,20 +45,13 @@ class OssEasy
   # @param {String | Buffer} data
   # @param {Function} callback
   writeFile : (filename, data, callback) ->
-    pathToTempFile = "/tmp/#{generateRandomId()}"
+    pathToTempFile = path.join "/tmp/", generateRandomId()
 
     fs.writeFile pathToTempFile, data, (err)=>
       if err?
         return callback(err)
       else
         @uploadFile filename, pathToTempFile, callback
-        #args =
-          #bucket: TARGET_BUCKET
-          #object: filename
-          #srcFile: pathToTempFile
-
-        #oss.putObject args, callback
-
     return
 
   # upload a local file to oss bucket
@@ -87,6 +70,7 @@ class OssEasy
 
   # upload multiple files in a batch
   # @param {String[]} filenames, an array contain all filenames
+  # @param {String} basePath[optional] if supplied, will path.join basePath, each filenames
   uploadFileBatch : (filenames, basePath, callback) ->
     unless Array.isArray filenames
       err = "bad argument, filenames:#{filenames}"
@@ -98,15 +82,13 @@ class OssEasy
       callback = basePath
       basePath = null
 
-    if _.isString(basePath)
+    if _.isString(basePath) and basePath.length > 0
+      filenames = filenames.concat() # keep extenal input argument untouched
       for filename, i in filenames
         filenames[i] = path.join(basePath, filename)
 
-    # here
-
-
     async.eachSeries filenames, (filename, eachCallback)=>
-      @uploadFile filename, path.join(basePath, filename), eachCallback
+      @uploadFile path.basename(filename), filename, eachCallback
     , callback
 
     return

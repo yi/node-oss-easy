@@ -2,6 +2,7 @@ require 'mocha'
 should = require('chai').should()
 oss_easy = require "../oss-easy"
 fs = require "fs"
+path = require "path"
 
 
 STRING_CONTENT_FOR_TESTING = "just a piece of data"
@@ -50,6 +51,20 @@ describe "testing oss", (done)->
     oss.uploadFileBatch FILE_NAMES, "/tmp", (err)->
       should.not.exist(err)
       done()
+
+  it "uploadFile in a batch with individual full file pahts, should work", (done)->
+
+    for i in [0...4] by 1
+      fs.writeFileSync "/tmp/#{FILE_NAMES[i]}-i", "#{STRING_CONTENT_FOR_TESTING2}-#{i}"
+
+    filenames = FILE_NAMES.concat()
+    for filename, i in filenames
+      filenames[i] = path.join "/tmp", "#{filename}-i"
+
+    oss.uploadFileBatch filenames, (err)->
+      should.not.exist(err)
+      done()
+
 
   it "delete file should work", (done)->
     filename = "just-a-test"
