@@ -29,6 +29,8 @@ class OssEasy
   # @param {Object} [options] , refer to [options] of fs.readFile
   # @param {Function} callback
   readFile : (filename, options, callback) ->
+    console.log "[oss-easy::readFile] #{filename}"
+
     pathToTempFile = path.join "/tmp/", generateRandomId()
 
     @downloadFile filename, pathToTempFile, (err) ->
@@ -45,6 +47,8 @@ class OssEasy
   # @param {String | Buffer} data
   # @param {Function} callback
   writeFile : (filename, data, callback) ->
+    console.log "[oss-easy::writeFile] #{filename}"
+
     pathToTempFile = path.join "/tmp/", generateRandomId()
 
     fs.writeFile pathToTempFile, data, (err)=>
@@ -59,6 +63,8 @@ class OssEasy
   # @param {String} pathToFile
   # @param {Function} callback
   uploadFile : (filename, pathToFile, callback) ->
+    console.log "[oss-easy::uploadFile] #{pathToFile} -> #{filename}"
+
     args =
       bucket: @targetBucket
       object: filename
@@ -98,6 +104,8 @@ class OssEasy
   # @param {String} pathToFile
   # @param {Function} callback
   downloadFile : (filename, pathToFile, callback) ->
+    console.log "[oss-easy::downloadFile] #{pathToFile} <- #{filename}"
+
     args =
       bucket: @targetBucket
       object: filename
@@ -110,6 +118,8 @@ class OssEasy
   # delete a single file from oss bucket
   # @param {String} filename
   deleteFile : (filename, callback) ->
+    console.log "[oss-easy::deleteFile] #{filename}"
+
     args =
       bucket: @targetBucket
       object: filename

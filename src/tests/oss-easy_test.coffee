@@ -55,11 +55,11 @@ describe "testing oss", (done)->
   it "uploadFile in a batch with individual full file pahts, should work", (done)->
 
     for i in [0...4] by 1
-      fs.writeFileSync "/tmp/#{FILE_NAMES[i]}-i", "#{STRING_CONTENT_FOR_TESTING2}-#{i}"
+      fs.writeFileSync "/tmp/#{FILE_NAMES[i]}-i.tmp", "#{STRING_CONTENT_FOR_TESTING2}-#{i}"
 
     filenames = FILE_NAMES.concat()
     for filename, i in filenames
-      filenames[i] = path.join "/tmp", "#{filename}-i"
+      filenames[i] = path.join "/tmp", "#{filename}-i.tmp"
 
     oss.uploadFileBatch filenames, (err)->
       should.not.exist(err)
