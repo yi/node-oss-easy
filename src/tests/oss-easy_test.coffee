@@ -12,6 +12,8 @@ STRING_CONTENT_FOR_TESTING2 = "222 just a piece of data 222"
 ossOptions =
   accessKeyId : process.env.OSS_KEY
   accessKeySecret : process.env.OSS_SECRET
+  host : "oss-cn-qingdao-a.aliyuncs.com"
+
 
 oss = new ossEasy(ossOptions, process.env.OSS_BUCKET)
 
