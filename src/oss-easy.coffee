@@ -57,14 +57,13 @@ class OssEasy
   # @param {String | Buffer} data
   # @param {Function} callback
   writeFile : (remoteFilePath, data, callback) ->
-    console.log "[oss-easy::writeFile] #{filename}"
+    console.log "[oss-easy::writeFile] #{remoteFilePath}"
 
     if Buffer.isBuffer(data)
       contentType = "application/octet-stream"
     else
       contentType = "text/plain"
       data = new Buffer(data)
-
 
     args =
       bucket: @targetBucket

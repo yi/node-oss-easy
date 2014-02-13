@@ -12,7 +12,6 @@ STRING_CONTENT_FOR_TESTING2 = "222 just a piece of data 222"
 ossOptions =
   accessKeyId : process.env.OSS_KEY
   accessKeySecret : process.env.OSS_SECRET
-  host : "oss-cn-qingdao-a.aliyuncs.com"
 
 
 oss = new ossEasy(ossOptions, process.env.OSS_BUCKET)
@@ -26,7 +25,7 @@ FILE_NAMES= [
 describe "testing oss", (done)->
 
   it "writeFile and readFile should work", (done)->
-    filename = "just-a-test"
+    filename = "just/a/test"
     oss.writeFile filename, STRING_CONTENT_FOR_TESTING, (err)->
       #console.log err
       should.not.exist(err)
@@ -87,7 +86,7 @@ describe "testing oss", (done)->
       done()
 
   it "delete file should work", (done)->
-    filename = "just-a-test"
+    filename = "just/a/test"
     oss.deleteFile filename, (err)->
       should.not.exist(err)
       done()
