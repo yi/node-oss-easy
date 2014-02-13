@@ -53,6 +53,13 @@ oss.deleteFileBatch(['remote_file_name0','remote_file_name1'], function(err) {
 });
 ```
 
+## Test
+
+```
+OSS_KEY=your-key OSS_SECRET=your-secret OSS_BUCKET=bucket-name mocha tests
+```
+
+
 ## License
 Copyright (c) 2013 yi
 Licensed under the MIT license.

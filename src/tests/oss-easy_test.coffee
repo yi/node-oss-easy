@@ -1,6 +1,6 @@
 require 'mocha'
 should = require('chai').should()
-oss_easy = require "../oss-easy"
+ossEasy = require "../oss-easy"
 fs = require "fs"
 path = require "path"
 
@@ -9,9 +9,11 @@ STRING_CONTENT_FOR_TESTING = "just a piece of data"
 
 STRING_CONTENT_FOR_TESTING2 = "222 just a piece of data 222"
 
-#oss = oss_easy.init("T2ddFoapcbkps1S7", "0ByL2vqAnG17F4k6auJLiKd1kcu7xu", "testdrive")
-oss = oss_easy.init("T2ddFoapcbkps1S7", "0ByL2vqAnG17F4k6auJLiKd1kcu7xu", "mocha-test")
+ossOptions =
+  accessKeyId : process.env.OSS_KEY
+  accessKeySecret : process.env.OSS_SECRET
 
+oss = new ossEasy(ossOptions, process.env.OSS_BUCKET)
 
 FILE_NAMES= [
   "#{Date.now()}-t1",

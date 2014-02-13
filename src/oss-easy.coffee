@@ -17,23 +17,33 @@ generateRandomId = ->
 
 class OssEasy
 
-  constructor: (key, secret, @targetBucket) ->
-    @oss = new ossAPI.OssClient
-      accessKeyId: key
-      accessKeySecret: secret
+  # constructor function
+  # @param {Object} ossOptions
+  #   accessKeyId :
+  #   accessKeySecret :
+  #   host : default: 'oss.aliyuncs.com';
+  #   port : default:  '8080';
+  #   timeout : default: 300000 ms;
+  # @param {String} targetBucket bucket name
+  constructor: (ossOptions, @targetBucket) ->
+    unless _.isString(ossOptions.accessKeyId) and _.isString(ossOptions.accessKeySecret) and _.isString(@targetBucket)
+      throw new Error "missing input parameter: accessKeyId:#{ossOptions.accessKeyId}, accessKeySecret: #{ossOptions.accessKeySecret}, targetBucket:#{targetBucket}"
+      return
 
+    ossOptions['timeout'] = ossOptions['timeout'] || 5 * 60 * 1000
+    @oss = new ossAPI.OssClient(ossOptions)
 
   # read file from oss
   # @param {String} bucketName
   # @param {String} filename
   # @param {Object} [options] , refer to [options] of fs.readFile
   # @param {Function} callback
-  readFile : (filename, options, callback) ->
-    console.log "[oss-easy::readFile] #{filename}"
+  readFile : (filepath, options, callback) ->
+    console.log "[oss-easy::readFile] #{filepath}"
 
     pathToTempFile = path.join "/tmp/", generateRandomId()
 
-    @downloadFile filename, pathToTempFile, (err) ->
+    @downloadFile filepath, pathToTempFile, (err) ->
       if err?
         callback(err) if _.isFunction callback
       else
@@ -46,28 +56,36 @@ class OssEasy
   # @param {String} filename
   # @param {String | Buffer} data
   # @param {Function} callback
-  writeFile : (filename, data, callback) ->
+  writeFile : (remoteFilePath, data, callback) ->
     console.log "[oss-easy::writeFile] #{filename}"
 
-    pathToTempFile = path.join "/tmp/", generateRandomId()
+    if Buffer.isBuffer(data)
+      contentType = "application/octet-stream"
+    else
+      contentType = "text/plain"
+      data = new Buffer(data)
 
-    fs.writeFile pathToTempFile, data, (err)=>
-      if err?
-        return callback(err) if _.isFunction callback
-      else
-        @uploadFile filename, pathToTempFile, callback
-    return
-
-  # upload a local file to oss bucket
-  # @param {String} filename
-  # @param {String} pathToFile
-  # @param {Function} callback
-  uploadFile : (filename, pathToFile, callback) ->
-    console.log "[oss-easy::uploadFile] #{pathToFile} -> #{filename}"
 
     args =
       bucket: @targetBucket
-      object: filename
+      object: remoteFilePath
+      srcFile: data
+      contentType : contentType
+
+    @oss.putObject args, callback
+
+    return
+
+  # upload a local file to oss bucket
+  # @param {String} remoteFilePath
+  # @param {String} pathToFile
+  # @param {Function} callback
+  uploadFile : (remoteFilePath, pathToFile, callback) ->
+    console.log "[oss-easy::uploadFile] #{pathToFile} -> #{remoteFilePath}"
+
+    args =
+      bucket: @targetBucket
+      object: remoteFilePath
       srcFile: pathToFile
 
     @oss.putObject args, callback
@@ -145,7 +163,7 @@ class OssEasy
     return
 
   # delete a single file from oss bucket
-  # @param {String} filename
+  # @param {String[]} filenames[]
   deleteFileBatch : (filenames, callback) ->
     unless Array.isArray filenames
       err = "bad argument, filenames:#{filenames}"
@@ -158,12 +176,7 @@ class OssEasy
 
     return
 
-# init the oss client
-# @param {String} key
-# @param {String} secret
-exports.init = (key, secret, bucketName) ->
-  unless _.isString(key) and _.isString(secret) and _.isString(bucketName) and key.length > 0 and secret.length > 0 and bucketName.length > 0
-    return throw new Error "Invalid arguments. key:#{key}, secret:#{secret}, bucket:#{bucketName}"
+module.exports=OssEasy
 
-  return new OssEasy(key, secret, bucketName)
+
 
