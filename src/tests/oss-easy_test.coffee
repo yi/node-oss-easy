@@ -33,6 +33,7 @@ describe "testing oss", (done)->
         data.should.equal STRING_CONTENT_FOR_TESTING
         done()
 
+
   it "uploadFile and downloadFile should work", (done)->
     pathToTempFile = "/tmp/#{Date.now()}"
     pathToTempFile2 = "/tmp/#{Date.now()}-back"
@@ -40,60 +41,54 @@ describe "testing oss", (done)->
 
     filename = "test-file-upload-download"
 
-    oss.uploadFile filename, pathToTempFile, (err) ->
+    oss.uploadFile pathToTempFile, filename, (err) ->
       should.not.exist(err)
       oss.downloadFile filename, pathToTempFile2, (err) ->
         should.not.exist(err)
         fs.readFileSync(pathToTempFile2, 'utf8').should.equal(fs.readFileSync(pathToTempFile, 'utf8'))
         done()
 
-  it "uploadFile in a batch should work", (done)->
+
+  it "uploadFile multiple files should work", (done)->
+    tasks = {}
+
     for i in [0...4] by 1
+      tasks["/tmp/#{FILE_NAMES[i]}"] = "test/upload/multiple/files-#{i}"
       fs.writeFileSync "/tmp/#{FILE_NAMES[i]}", "#{STRING_CONTENT_FOR_TESTING2}-#{i}"
 
-    oss.uploadFileBatch FILE_NAMES, "/tmp", (err)->
+    oss.uploadFiles tasks, (err)->
       should.not.exist(err)
       done()
 
-  it "uploadFile in a batch with individual full file pahts, should work", (done)->
+
+  it "download multiple files should work", (done)->
+
+    tasks = {}
 
     for i in [0...4] by 1
-      fs.writeFileSync "/tmp/#{FILE_NAMES[i]}-i.tmp", "#{STRING_CONTENT_FOR_TESTING2}-#{i}"
+      tasks["test/upload/multiple/files-#{i}"] = "/tmp/download-#{FILE_NAMES[i]}"
 
-    filenames = FILE_NAMES.concat()
-    for filename, i in filenames
-      filenames[i] = path.join "/tmp", "#{filename}-i.tmp"
-
-    oss.uploadFileBatch filenames, (err)->
+    oss.downloadFiles tasks, (err)->
       should.not.exist(err)
+
+      for i in [0...4] by 1
+        fs.readFileSync("/tmp/download-#{FILE_NAMES[i]}", 'utf8').should.equal(fs.readFileSync("/tmp/#{FILE_NAMES[i]}", 'utf8'))
+
       done()
-
-  it "download file in a batch should work", (done)->
-
-    for i in [0...4] by 1
-      fs.writeFileSync "/tmp/#{FILE_NAMES[i]}-i.tmp", "#{STRING_CONTENT_FOR_TESTING2}-#{i}"
-
-    filenames = FILE_NAMES.concat()
-    for filename, i in filenames
-      filenames[i] = "#{filename}-i.tmp"
-
-    pathToDownload = path.join "/tmp", "batch-download"
-
-    fs.mkdirSync(pathToDownload) unless fs.existsSync(pathToDownload)
-
-    oss.downloadFileBatch filenames, pathToDownload, (err)->
-      should.not.exist(err)
-      done()
+      return
 
   it "delete file should work", (done)->
-    filename = "just/a/test"
-    oss.deleteFile filename, (err)->
+    remoteFilePath = "just/a/test"
+    oss.deleteFile remoteFilePath, (err)->
       should.not.exist(err)
       done()
 
   it "delete multiple files in a batch should work", (done)->
-    filename = "just-a-test"
-    oss.deleteFileBatch FILE_NAMES, (err)->
+    remoteFilePaths = []
+    for i in [0...4] by 1
+      remoteFilePaths.push "test/upload/multiple/files-#{i}"
+
+    oss.deleteFiles remoteFilePaths, (err)->
       should.not.exist(err)
       done()
 

@@ -15,26 +15,56 @@ var oss = oss_easy.init("oss_key", "oss_secret", "bucket_name");
 
 ### Init and get bucekt client instance
 ```javascript
-var oss = oss_easy.init("oss_key", "oss_secret", "bucket_name");
+OssEasy = require("oss-easy")
+ossOptions = {
+  accessKeyId : "your oss key"
+  accessKeySecret : "your oss secret"
+}
+var oss = new OssEasy(ossOptions, "bucket_name");
 ```
 
 ### Write data to bucket
 ```javascript
-oss.writeFile('filename', 'content could be string of buffer', function(err) {
+oss.writeFile('remote/path/to/filename', 'content could be string of buffer', function(err) {
     if(err) console.log(err);
 });
 ```
 
 ### Upload a local file to bucket
 ```javascript
-oss.uploadFile('filename', 'path_to_local_file', function(err) {
+oss.uploadFile('path_to_local_file', 'remote/path/to/filename', function(err) {
     if(err) console.log(err);
 });
 ```
 
 ### Upload multiple local files to bucket in one batch
 ```javascript
-oss.uploadFileBatch(['local_file_name0', 'local_file_name1'], "path_to_local_folder", function(err) {
+var tasks = {
+  'local/path/to/filename0': "remote/path/to/filename0",
+  'local/path/to/filename1': "remote/path/to/filename1",
+  'local/path/to/filename2': "remote/path/to/filename2",
+};
+oss.uploadFiles(tasks, function(err) {
+    if(err) console.log(err);
+});
+```
+
+### Download a file from bucket
+```javascript
+oss.downloadFile('remote/path/to/filename', 'path_to_local_file', 'function(err) {
+    if(err) console.log(err);
+});
+```
+
+### Download multiple files from bucket
+```javascript
+var tasks = {
+  "remote/path/to/filename0": 'local/path/to/filename0',
+  "remote/path/to/filename1": 'local/path/to/filename1',
+  "remote/path/to/filename2": 'local/path/to/filename2',
+};
+
+oss.downloadFiles(tasks, function(err) {
     if(err) console.log(err);
 });
 ```
@@ -48,7 +78,7 @@ oss.deleteFile(filename, function(err) {
 
 ### Delete multiple remote files from bucket in one batch
 ```javascript
-oss.deleteFileBatch(['remote_file_name0','remote_file_name1'], function(err) {
+oss.deleteFiles(['remote/path/to/filename0','remote/path/to/filename1'], function(err) {
     if(err) console.log(err);
 });
 ```

@@ -38,12 +38,12 @@ class OssEasy
   # @param {String} filename
   # @param {Object} [options] , refer to [options] of fs.readFile
   # @param {Function} callback
-  readFile : (filepath, options, callback) ->
-    console.log "[oss-easy::readFile] #{filepath}"
+  readFile : (remoteFilePath, options, callback) ->
+    console.log "[oss-easy::readFile] #{remoteFilePath}"
 
     pathToTempFile = path.join "/tmp/", generateRandomId()
 
-    @downloadFile filepath, pathToTempFile, (err) ->
+    @downloadFile remoteFilePath, pathToTempFile, (err) ->
       if err?
         callback(err) if _.isFunction callback
       else
@@ -77,100 +77,99 @@ class OssEasy
 
   # upload a local file to oss bucket
   # @param {String} remoteFilePath
-  # @param {String} pathToFile
+  # @param {String} localFilePath
   # @param {Function} callback
-  uploadFile : (remoteFilePath, pathToFile, callback) ->
-    console.log "[oss-easy::uploadFile] #{pathToFile} -> #{remoteFilePath}"
+  uploadFile : (localFilePath, remoteFilePath, callback) ->
+    console.log "[oss-easy::uploadFile] #{localFilePath} -> #{remoteFilePath}"
 
     args =
       bucket: @targetBucket
       object: remoteFilePath
-      srcFile: pathToFile
+      srcFile: localFilePath
 
     @oss.putObject args, callback
 
     return
 
   # upload multiple files in a batch
-  # @param {String[]} filenames, an array contain all filenames
-  # @param {String} basePath[optional] if supplied, will path.join basePath, each filenames
-  uploadFileBatch : (filenames, basePath, callback) ->
-    unless Array.isArray filenames
-      err = "bad argument, filenames:#{filenames}"
-      console.error "[oss-easy::uploadFileBatch] #{err}"
-      callback(err) if _.isFunction callback
+  # @param {Object KV} tasks
+  #   keys: localFilePaths
+  #   values: remoteFilePaths
+  # @param {Function} callback
+  uploadFiles : (tasks, callback) ->
+    console.log "[oss-easy::uploadFiles] tasks:%j", tasks
+    unless tasks?
+      err = "bad argument, tasks:#{tasks}"
+      console.error "[oss-easy::uploadFiles] #{err}"
+      callback(err) if _.isFunction(callback)
       return
 
-    if _.isFunction(basePath) and not callback?
-      callback = basePath
-      basePath = null
+    localFilePaths = _.keys(tasks)
 
-    if _.isString(basePath) and basePath.length > 0
-      filenames = filenames.concat() # keep extenal input argument untouched
-      for filename, i in filenames
-        filenames[i] = path.join(basePath, filename)
-
-    async.eachSeries filenames, (filename, eachCallback)=>
-      @uploadFile path.basename(filename), filename, eachCallback
+    async.eachSeries localFilePaths, (localFilePath, eachCallback)=>
+      @uploadFile localFilePath, tasks[localFilePath], eachCallback
     , callback
 
     return
 
   # upload a local file to oss bucket
-  # @param {String} filename
-  # @param {String} pathToFile
+  # @param {String} remoteFilePath
+  # @param {String} localFilePath
   # @param {Function} callback
-  downloadFile : (filename, pathToFile, callback) ->
-    console.log "[oss-easy::downloadFile] #{pathToFile} <- #{filename}"
+  downloadFile : (remoteFilePath, localFilePath, callback) ->
+    console.log "[oss-easy::downloadFile] #{localFilePath} <- #{remoteFilePath}"
 
     args =
       bucket: @targetBucket
-      object: filename
-      dstFile: pathToFile
+      object: remoteFilePath
+      dstFile: localFilePath
 
     @oss.getObject args, callback
 
     return
 
   # upload a local file to oss bucket
-  # @param {String} filename
-  # @param {String} basePath
+  # @param {Object KV} tasks
+  #   keys: remoteFilePaths
+  #   values: localFilePaths
   # @param {Function} callback
-  downloadFileBatch : (filenames, basePath, callback) ->
-    unless Array.isArray(filenames) and _.isString(basePath) and basePath.length > 0
-      err = "bad argument, filenames:#{filenames}"
+  downloadFiles: (tasks, callback) ->
+    unless tasks?
+      err = "bad argument, tasks:#{tasks}"
       console.error "[oss-easy::downloadFileBatch] #{err}"
       callback(err) if _.isFunction(callback)
       return
 
-    async.eachSeries filenames, (filename, eachCallback)=>
-      @downloadFile filename, path.join(basePath, filename), eachCallback
+    remoteFilePaths = _.keys(tasks)
+
+    async.eachSeries remoteFilePaths, (remoteFilePath, eachCallback)=>
+      @downloadFile remoteFilePath, tasks[remoteFilePath], eachCallback
     , callback
 
     return
 
   # delete a single file from oss bucket
-  # @param {String} filename
-  deleteFile : (filename, callback) ->
-    console.log "[oss-easy::deleteFile] #{filename}"
+  # @param {String} remoteFilePath
+  deleteFile : (remoteFilePath, callback) ->
+    console.log "[oss-easy::deleteFile] #{remoteFilePath}"
 
     args =
       bucket: @targetBucket
-      object: filename
+      object: remoteFilePath
 
     @oss.deleteObject args, callback
     return
 
   # delete a single file from oss bucket
-  # @param {String[]} filenames[]
-  deleteFileBatch : (filenames, callback) ->
-    unless Array.isArray filenames
-      err = "bad argument, filenames:#{filenames}"
+  # @param {String[]} remoteFilePaths[]
+  deleteFiles: (remoteFilePaths, callback) ->
+    unless Array.isArray remoteFilePaths
+      err = "bad argument, remoteFilePaths:#{remoteFilePaths}"
       console.error "[oss-easy::deleteFileBatch] #{err}"
       callback(err) if _.isFunction callback
       return
-    async.eachSeries filenames, (filename, eachCallback)=>
-      @deleteFile filename, eachCallback
+    async.eachSeries remoteFilePaths, (remoteFilePath, eachCallback)=>
+      @deleteFile remoteFilePath, eachCallback
     , callback
 
     return
