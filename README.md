@@ -3,17 +3,9 @@
 an aliyun oss service client for nodejs, exposes api more like the file system module of Node.JS
 一个阿里云 OSS 服务的 Node.JS 模块，提供类似 fs 的 API。同时提供一些方便的批量操作方法
 
-## Getting Started
-Install the module with: `npm install oss-easy`
-
-```javascript
-var oss_easy = require('oss-easy');
-var oss = oss_easy.init("oss_key", "oss_secret", "bucket_name");
-```
-
 ## Documentation
 
-### Init and get bucekt client instance
+### Init bucekt client instance
 ```javascript
 OssEasy = require("oss-easy")
 ossOptions = {
