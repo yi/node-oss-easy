@@ -49,6 +49,20 @@ describe "testing oss", (done)->
         done()
 
 
+  it "uploadFile file with custom header should work", (done)->
+    pathToTempFile = "/tmp/#{Date.now()}-custom-header"
+    fs.writeFileSync pathToTempFile, STRING_CONTENT_FOR_TESTING2
+
+    filename = "test-file-upload-custom-header"
+
+    oss.uploadFile pathToTempFile, filename,
+      "Cache-Control": "max-age=5"
+      "Expires" : Date.now() + 300000
+    , (err) ->
+      should.not.exist(err)
+      done()
+
+
   it "uploadFile multiple files should work", (done)->
     tasks = {}
 

@@ -56,7 +56,7 @@ class OssEasy
   # @param {String} filename
   # @param {String | Buffer} data
   # @param {Function} callback
-  writeFile : (remoteFilePath, data, callback) ->
+  writeFile : (remoteFilePath, data, headers, callback) ->
     console.log "[oss-easy::writeFile] #{remoteFilePath}"
 
     if Buffer.isBuffer(data)
@@ -65,11 +65,17 @@ class OssEasy
       contentType = "text/plain"
       data = new Buffer(data)
 
+    if _.isFunction(headers) and not callback?
+      callback = headers
+      headers = null
+
     args =
       bucket: @targetBucket
       object: remoteFilePath
       srcFile: data
       contentType : contentType
+
+    args["userMetas"] = headers if headers?
 
     @oss.putObject args, callback
 
@@ -79,13 +85,19 @@ class OssEasy
   # @param {String} remoteFilePath
   # @param {String} localFilePath
   # @param {Function} callback
-  uploadFile : (localFilePath, remoteFilePath, callback) ->
+  uploadFile : (localFilePath, remoteFilePath, headers, callback) ->
     console.log "[oss-easy::uploadFile] #{localFilePath} -> #{remoteFilePath}"
+
+    if _.isFunction(headers) and not callback?
+      callback = headers
+      headers = null
 
     args =
       bucket: @targetBucket
       object: remoteFilePath
       srcFile: localFilePath
+
+    args["userMetas"] = headers if headers?
 
     @oss.putObject args, callback
 
@@ -96,7 +108,7 @@ class OssEasy
   #   keys: localFilePaths
   #   values: remoteFilePaths
   # @param {Function} callback
-  uploadFiles : (tasks, callback) ->
+  uploadFiles : (tasks, headers,  callback) ->
     console.log "[oss-easy::uploadFiles] tasks:%j", tasks
     unless tasks?
       err = "bad argument, tasks:#{tasks}"
@@ -104,10 +116,14 @@ class OssEasy
       callback(err) if _.isFunction(callback)
       return
 
+    if _.isFunction(headers) and not callback?
+      callback = headers
+      headers = null
+
     localFilePaths = _.keys(tasks)
 
     async.eachSeries localFilePaths, (localFilePath, eachCallback)=>
-      @uploadFile localFilePath, tasks[localFilePath], eachCallback
+      @uploadFile localFilePath, tasks[localFilePath], headers, eachCallback
     , callback
 
     return
