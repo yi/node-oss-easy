@@ -13,7 +13,8 @@ STRING_CONTENT_FOR_TESTING2 = "222 just a piece of data 222"
 ossOptions =
   accessKeyId : config.accessKeyId
   accessKeySecret : config.accessKeySecret
-
+  uploaderHeaders :
+    "Content-disposition" : "attachment;filename=whatever.gif"
 
 oss = new ossEasy(ossOptions, config.bucket)
 

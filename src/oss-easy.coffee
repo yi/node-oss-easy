@@ -24,6 +24,7 @@ class OssEasy
   #   host : default: 'oss.aliyuncs.com';
   #   port : default:  '8080';
   #   timeout : default: 300000 ms;
+  #   uploaderHeaders : http headers for all uploading actions
   # @param {String} targetBucket bucket name
   constructor: (ossOptions, @targetBucket) ->
     unless _.isString(ossOptions.accessKeyId) and _.isString(ossOptions.accessKeySecret) and _.isString(@targetBucket)
@@ -31,7 +32,11 @@ class OssEasy
       return
 
     ossOptions['timeout'] = ossOptions['timeout'] || 5 * 60 * 1000
+    if ossOptions.uploaderHeaders?
+      @uploaderHeaders = ossOptions.uploaderHeaders
+      delete ossOptions['uploaderHeaders']
     @oss = new ossAPI.OssClient(ossOptions)
+
 
   # read file from oss
   # @param {String} bucketName
@@ -75,6 +80,7 @@ class OssEasy
       srcFile: data
       contentType : contentType
 
+    headers = _.extend({}, headers, @uploaderHeaders) if headers? or @uploaderHeaders?
     args["userMetas"] = headers if headers?
 
     @oss.putObject args, callback
@@ -97,8 +103,10 @@ class OssEasy
       object: remoteFilePath
       srcFile: localFilePath
 
+    headers = _.extend({}, headers, @uploaderHeaders) if headers? or @uploaderHeaders?
     args["userMetas"] = headers if headers?
 
+    console.log "[oss-easy::uploadFile] headers:%j", headers
     @oss.putObject args, callback
 
     return
