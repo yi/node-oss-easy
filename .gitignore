@@ -1,2 +1,4 @@
 /node_modules/
 *.swp
+src/tests/config.coffee
+lib/tests/config.js

@@ -3,6 +3,7 @@ should = require('chai').should()
 ossEasy = require "../oss-easy"
 fs = require "fs"
 path = require "path"
+config = require "./config"
 
 
 STRING_CONTENT_FOR_TESTING = "just a piece of data"
@@ -10,11 +11,11 @@ STRING_CONTENT_FOR_TESTING = "just a piece of data"
 STRING_CONTENT_FOR_TESTING2 = "222 just a piece of data 222"
 
 ossOptions =
-  accessKeyId : process.env.OSS_KEY
-  accessKeySecret : process.env.OSS_SECRET
+  accessKeyId : config.accessKeyId
+  accessKeySecret : config.accessKeySecret
 
 
-oss = new ossEasy(ossOptions, process.env.OSS_BUCKET)
+oss = new ossEasy(ossOptions, config.bucket)
 
 FILE_NAMES= [
   "#{Date.now()}-t1",
@@ -24,7 +25,7 @@ FILE_NAMES= [
 
 describe "testing oss", (done)->
 
-  it "writeFile and readFile should work", (done)->
+  it "writeFile and readFile", (done)->
     filename = "just/a/test"
     oss.writeFile filename, STRING_CONTENT_FOR_TESTING, (err)->
       #console.log err
@@ -34,7 +35,7 @@ describe "testing oss", (done)->
         done()
 
 
-  it "uploadFile and downloadFile should work", (done)->
+  it "uploadFile and downloadFile", (done)->
     pathToTempFile = "/tmp/#{Date.now()}"
     pathToTempFile2 = "/tmp/#{Date.now()}-back"
     fs.writeFileSync pathToTempFile, STRING_CONTENT_FOR_TESTING2
@@ -49,7 +50,7 @@ describe "testing oss", (done)->
         done()
 
 
-  it "uploadFile file with custom header should work", (done)->
+  it "uploadFile file with custom header", (done)->
     pathToTempFile = "/tmp/#{Date.now()}-custom-header"
     fs.writeFileSync pathToTempFile, STRING_CONTENT_FOR_TESTING2
 
@@ -63,7 +64,7 @@ describe "testing oss", (done)->
       done()
 
 
-  it "uploadFile multiple files should work", (done)->
+  it "uploadFile multiple files", (done)->
     tasks = {}
 
     for i in [0...4] by 1
@@ -75,7 +76,7 @@ describe "testing oss", (done)->
       done()
 
 
-  it "download multiple files should work", (done)->
+  it "download multiple files", (done)->
 
     tasks = {}
 
@@ -91,13 +92,13 @@ describe "testing oss", (done)->
       done()
       return
 
-  it "delete file should work", (done)->
+  it "delete file", (done)->
     remoteFilePath = "just/a/test"
     oss.deleteFile remoteFilePath, (err)->
       should.not.exist(err)
       done()
 
-  it "delete multiple files in a batch should work", (done)->
+  it "delete multiple files in a batch", (done)->
     remoteFilePaths = []
     for i in [0...4] by 1
       remoteFilePaths.push "test/upload/multiple/files-#{i}"

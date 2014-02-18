@@ -78,7 +78,7 @@ oss.deleteFiles(['remote/path/to/filename0','remote/path/to/filename1'], functio
 ## Test
 
 ```
-OSS_KEY=your-key OSS_SECRET=your-secret OSS_BUCKET=bucket-name mocha tests
+mocha tests
 ```
 
 
