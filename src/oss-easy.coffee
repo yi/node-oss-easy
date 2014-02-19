@@ -25,8 +25,10 @@ class OssEasy
   #   port : default:  '8080';
   #   timeout : default: 300000 ms;
   #   uploaderHeaders : http headers for all uploading actions
+  #   bucket : target bucket
   # @param {String} targetBucket bucket name
   constructor: (ossOptions, @targetBucket) ->
+    @targetBucket or= ossOptions.bucket
     unless _.isString(ossOptions.accessKeyId) and _.isString(ossOptions.accessKeySecret) and _.isString(@targetBucket)
       throw new Error "missing input parameter: accessKeyId:#{ossOptions.accessKeyId}, accessKeySecret: #{ossOptions.accessKeySecret}, targetBucket:#{targetBucket}"
       return

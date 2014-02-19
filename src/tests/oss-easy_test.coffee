@@ -13,10 +13,11 @@ STRING_CONTENT_FOR_TESTING2 = "222 just a piece of data 222"
 ossOptions =
   accessKeyId : config.accessKeyId
   accessKeySecret : config.accessKeySecret
+  bucket : config.bucket
   uploaderHeaders :
     "Content-disposition" : "attachment;filename=whatever.gif"
 
-oss = new ossEasy(ossOptions, config.bucket)
+oss = new ossEasy(ossOptions)
 
 FILE_NAMES= [
   "#{Date.now()}-t1",
