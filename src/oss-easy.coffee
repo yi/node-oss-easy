@@ -11,6 +11,7 @@ ossAPI = require 'oss-client'
 fs = require "fs"
 async = require "async"
 path = require "path"
+debuglog = require("debug")("oss-easy")
 
 generateRandomId = ->
   return "#{(Math.random() * 36 >> 0).toString(36)}#{(Math.random() * 36 >> 0).toString(36)}#{Date.now().toString(36)}"
@@ -37,6 +38,9 @@ class OssEasy
     if ossOptions.uploaderHeaders?
       @uploaderHeaders = ossOptions.uploaderHeaders
       delete ossOptions['uploaderHeaders']
+
+    debuglog "[constructor] ossOptions:%j", ossOptions
+
     @oss = new ossAPI.OssClient(ossOptions)
 
 
@@ -46,7 +50,7 @@ class OssEasy
   # @param {Object} [options] , refer to [options] of fs.readFile
   # @param {Function} callback
   readFile : (remoteFilePath, options, callback) ->
-    console.log "[oss-easy::readFile] #{remoteFilePath}"
+    debuglog "[oss-easy::readFile] #{remoteFilePath}"
 
     pathToTempFile = path.join "/tmp/", generateRandomId()
 
@@ -64,7 +68,7 @@ class OssEasy
   # @param {String | Buffer} data
   # @param {Function} callback
   writeFile : (remoteFilePath, data, headers, callback) ->
-    console.log "[oss-easy::writeFile] #{remoteFilePath}"
+    debuglog "[oss-easy::writeFile] #{remoteFilePath}"
 
     if Buffer.isBuffer(data)
       contentType = "application/octet-stream"
@@ -94,7 +98,7 @@ class OssEasy
   # @param {String} localFilePath
   # @param {Function} callback
   uploadFile : (localFilePath, remoteFilePath, headers, callback) ->
-    console.log "[oss-easy::uploadFile] #{localFilePath} -> #{remoteFilePath}"
+    debuglog "[uploadFile] #{localFilePath} -> #{remoteFilePath}"
 
     if _.isFunction(headers) and not callback?
       callback = headers
@@ -108,7 +112,7 @@ class OssEasy
     headers = _.extend({}, headers, @uploaderHeaders) if headers? or @uploaderHeaders?
     args["userMetas"] = headers if headers?
 
-    console.log "[oss-easy::uploadFile] headers:%j", headers
+    debuglog "[uploadFile] headers:%j", headers
     @oss.putObject args, callback
 
     return
@@ -119,7 +123,7 @@ class OssEasy
   #   values: remoteFilePaths
   # @param {Function} callback
   uploadFiles : (tasks, headers,  callback) ->
-    console.log "[oss-easy::uploadFiles] tasks:%j", tasks
+    debuglog "[uploadFiles] tasks:%j", tasks
     unless tasks?
       err = "bad argument, tasks:#{tasks}"
       console.error "[oss-easy::uploadFiles] #{err}"
@@ -143,7 +147,7 @@ class OssEasy
   # @param {String} localFilePath
   # @param {Function} callback
   downloadFile : (remoteFilePath, localFilePath, callback) ->
-    console.log "[oss-easy::downloadFile] #{localFilePath} <- #{remoteFilePath}"
+    debuglog "[downloadFile] #{localFilePath} <- #{remoteFilePath}"
 
     args =
       bucket: @targetBucket
@@ -177,7 +181,7 @@ class OssEasy
   # delete a single file from oss bucket
   # @param {String} remoteFilePath
   deleteFile : (remoteFilePath, callback) ->
-    console.log "[oss-easy::deleteFile] #{remoteFilePath}"
+    debuglog "[oss-easy::deleteFile] #{remoteFilePath}"
 
     args =
       bucket: @targetBucket
