@@ -27,6 +27,8 @@ FILE_NAMES= [
 
 describe "testing oss", (done)->
 
+  @timeout(10000)
+
   it "writeFile and readFile", (done)->
     filename = "just/a/test"
     oss.writeFile filename, STRING_CONTENT_FOR_TESTING, (err)->

@@ -12,6 +12,7 @@ fs = require "fs"
 async = require "async"
 path = require "path"
 debuglog = require("debug")("oss-easy")
+assert = require "assert"
 
 generateRandomId = ->
   return "#{(Math.random() * 36 >> 0).toString(36)}#{(Math.random() * 36 >> 0).toString(36)}#{Date.now().toString(36)}"
@@ -28,18 +29,22 @@ class OssEasy
   #   uploaderHeaders : http headers for all uploading actions
   #   bucket : target bucket
   # @param {String} targetBucket bucket name
-  constructor: (ossOptions, @targetBucket) ->
-    @targetBucket or= ossOptions.bucket
-    unless _.isString(ossOptions.accessKeyId) and _.isString(ossOptions.accessKeySecret) and _.isString(@targetBucket)
-      throw new Error "missing input parameter: accessKeyId:#{ossOptions.accessKeyId}, accessKeySecret: #{ossOptions.accessKeySecret}, targetBucket:#{targetBucket}"
-      return
+  constructor: (ossOptions, targetBucket) ->
+
+    assert ossOptions, "missing options"
+    assert ossOptions.accessKeyId, "missing oss key id"
+    assert ossOptions.accessKeySecret, "missing access secret"
+
+    @targetBucket = targetBucket || ossOptions.bucket
+
+    assert @targetBucket, "missing bucket name"
 
     ossOptions['timeout'] = ossOptions['timeout'] || 5 * 60 * 1000
     if ossOptions.uploaderHeaders?
       @uploaderHeaders = ossOptions.uploaderHeaders
       delete ossOptions['uploaderHeaders']
 
-    debuglog "[constructor] ossOptions:%j", ossOptions
+    debuglog "[constructor] bucket: %j, ossOptions:%j", @targetBucket, ossOptions
 
     @oss = new ossAPI.OssClient(ossOptions)
 
@@ -98,7 +103,7 @@ class OssEasy
   # @param {String} localFilePath
   # @param {Function} callback
   uploadFile : (localFilePath, remoteFilePath, headers, callback) ->
-    debuglog "[uploadFile] #{localFilePath} -> #{remoteFilePath}"
+    debuglog "[uploadFile] local:#{localFilePath} -> #{@targetBucket}:#{remoteFilePath}"
 
     if _.isFunction(headers) and not callback?
       callback = headers
@@ -147,7 +152,7 @@ class OssEasy
   # @param {String} localFilePath
   # @param {Function} callback
   downloadFile : (remoteFilePath, localFilePath, callback) ->
-    debuglog "[downloadFile] #{localFilePath} <- #{remoteFilePath}"
+    debuglog "[downloadFile] #{@targetBucket}:#{remoteFilePath} -> local:#{localFilePath}"
 
     args =
       bucket: @targetBucket
