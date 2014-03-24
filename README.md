@@ -68,6 +68,12 @@ oss.deleteFile(filename, function(err) {
 });
 ```
 
+### Delete all remote files under a given folder path
+```javascript
+oss.deleteFolder('remote/path/to/folder', function(err) {
+    if(err) console.log(err);
+})
+```
 ### Delete multiple remote files from bucket in one batch
 ```javascript
 oss.deleteFiles(['remote/path/to/filename0','remote/path/to/filename1'], function(err) {
