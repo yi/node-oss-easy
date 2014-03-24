@@ -17,6 +17,9 @@ assert = require "assert"
 generateRandomId = ->
   return "#{(Math.random() * 36 >> 0).toString(36)}#{(Math.random() * 36 >> 0).toString(36)}#{Date.now().toString(36)}"
 
+
+NONSENCE_CALLBACK = ()->
+
 class OssEasy
 
   # constructor function
@@ -55,7 +58,7 @@ class OssEasy
   # @param {Object} [options] , refer to [options] of fs.readFile
   # @param {Function} callback
   readFile : (remoteFilePath, options, callback) ->
-    debuglog "[oss-easy::readFile] #{remoteFilePath}"
+    debuglog "[readFile] #{remoteFilePath}"
 
     pathToTempFile = path.join "/tmp/", generateRandomId()
 
@@ -73,7 +76,7 @@ class OssEasy
   # @param {String | Buffer} data
   # @param {Function} callback
   writeFile : (remoteFilePath, data, headers, callback) ->
-    debuglog "[oss-easy::writeFile] #{remoteFilePath}"
+    debuglog "[writeFile] #{remoteFilePath}"
 
     if Buffer.isBuffer(data)
       contentType = "application/octet-stream"
@@ -129,15 +132,17 @@ class OssEasy
   # @param {Function} callback
   uploadFiles : (tasks, headers,  callback) ->
     debuglog "[uploadFiles] tasks:%j", tasks
-    unless tasks?
-      err = "bad argument, tasks:#{tasks}"
-      console.error "[oss-easy::uploadFiles] #{err}"
-      callback(err) if _.isFunction(callback)
-      return
 
     if _.isFunction(headers) and not callback?
       callback = headers
       headers = null
+
+    callback or= NONSENCE_CALLBACK
+
+    unless tasks?
+      err = "bad argument, tasks:#{tasks}"
+      console.error "ERROR [oss-easy::uploadFiles] #{err}"
+      return callback(err)
 
     localFilePaths = _.keys(tasks)
 
@@ -151,7 +156,7 @@ class OssEasy
   # @param {String} remoteFilePath
   # @param {String} localFilePath
   # @param {Function} callback
-  downloadFile : (remoteFilePath, localFilePath, callback) ->
+  downloadFile : (remoteFilePath, localFilePath, callback=NONSENCE_CALLBACK) ->
     debuglog "[downloadFile] #{@targetBucket}:#{remoteFilePath} -> local:#{localFilePath}"
 
     args =
@@ -168,7 +173,7 @@ class OssEasy
   #   keys: remoteFilePaths
   #   values: localFilePaths
   # @param {Function} callback
-  downloadFiles: (tasks, callback) ->
+  downloadFiles: (tasks, callback=NONSENCE_CALLBACK) ->
     unless tasks?
       err = "bad argument, tasks:#{tasks}"
       console.error "[oss-easy::downloadFileBatch] #{err}"
@@ -185,8 +190,13 @@ class OssEasy
 
   # delete a single file from oss bucket
   # @param {String} remoteFilePath
-  deleteFile : (remoteFilePath, callback) ->
-    debuglog "[oss-easy::deleteFile] #{remoteFilePath}"
+  deleteFile : (remoteFilePath, callback=NONSENCE_CALLBACK) ->
+    debuglog "[deleteFile] #{remoteFilePath}"
+
+    unless _.isString(remoteFilePath) and remoteFilePath
+      err = "bad argument, remoteFilePath:#{remoteFilePath}"
+      callback(err) if _.isFunction callback
+      return
 
     args =
       bucket: @targetBucket
@@ -195,19 +205,61 @@ class OssEasy
     @oss.deleteObject args, callback
     return
 
-  # delete a single file from oss bucket
+  # delete a list of single files from oss bucket
   # @param {String[]} remoteFilePaths[]
-  deleteFiles: (remoteFilePaths, callback) ->
-    unless Array.isArray remoteFilePaths
+  deleteFiles: (remoteFilePaths, callback=NONSENCE_CALLBACK) ->
+    debuglog "[deleteFiles] #{remoteFilePaths}"
+
+    unless Array.isArray(remoteFilePaths) and remoteFilePaths.length
       err = "bad argument, remoteFilePaths:#{remoteFilePaths}"
-      console.error "[oss-easy::deleteFileBatch] #{err}"
+      debuglog "[deleteFileBatch] #{err}"
       callback(err) if _.isFunction callback
       return
+
     async.eachSeries remoteFilePaths, (remoteFilePath, eachCallback)=>
       @deleteFile remoteFilePath, eachCallback
     , callback
 
     return
+
+  # delete all files under the given remote folder
+  # @param {String} remoteFolderPath
+  deleteFolder : (remoteFolderPath, callback=NONSENCE_CALLBACK) ->
+    debuglog "[deleteFolder] #{remoteFolderPath}"
+
+    unless _.isString(remoteFolderPath) and remoteFolderPath
+      err = "bad argument, remoteFolderPath:#{remoteFolderPath}"
+      debuglog "ERROR [deleteFolder] error:#{err}"
+      callback(err)
+      return
+
+    # list folder
+    args =
+      bucket: @targetBucket
+      prefix : remoteFolderPath
+      delimiter : "/"
+
+    @oss.listObject args, (err, result)=>
+      if err?
+        debuglog "ERROR [deleteFolder] error:#{err}"
+        callback(err)
+        return
+
+      filelist = []
+      try
+        for item in result.ListBucketResult.Contents
+          key = item.Key
+          filelist.push(if Array.isArray(key) then key[0] else key)
+      catch err
+        debuglog "ERROR [deleteFolder] error:#{err}"
+        callback(err)
+        return
+
+      @deleteFiles filelist, callback
+
+      return
+    return
+
 
 module.exports=OssEasy
 

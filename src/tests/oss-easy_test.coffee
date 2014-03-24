@@ -39,33 +39,33 @@ describe "testing oss", (done)->
         done()
 
 
-  it "uploadFile and downloadFile", (done)->
-    pathToTempFile = "/tmp/#{Date.now()}"
-    pathToTempFile2 = "/tmp/#{Date.now()}-back"
-    fs.writeFileSync pathToTempFile, STRING_CONTENT_FOR_TESTING2
+  #it "uploadFile and downloadFile", (done)->
+    #pathToTempFile = "/tmp/#{Date.now()}"
+    #pathToTempFile2 = "/tmp/#{Date.now()}-back"
+    #fs.writeFileSync pathToTempFile, STRING_CONTENT_FOR_TESTING2
 
-    filename = "test-file-upload-download"
+    #filename = "test-file-upload-download"
 
-    oss.uploadFile pathToTempFile, filename, (err) ->
-      should.not.exist(err)
-      oss.downloadFile filename, pathToTempFile2, (err) ->
-        should.not.exist(err)
-        fs.readFileSync(pathToTempFile2, 'utf8').should.equal(fs.readFileSync(pathToTempFile, 'utf8'))
-        done()
+    #oss.uploadFile pathToTempFile, filename, (err) ->
+      #should.not.exist(err)
+      #oss.downloadFile filename, pathToTempFile2, (err) ->
+        #should.not.exist(err)
+        #fs.readFileSync(pathToTempFile2, 'utf8').should.equal(fs.readFileSync(pathToTempFile, 'utf8'))
+        #done()
 
 
-  it "uploadFile file with custom header", (done)->
-    pathToTempFile = "/tmp/#{Date.now()}-custom-header"
-    fs.writeFileSync pathToTempFile, STRING_CONTENT_FOR_TESTING2
+  #it "uploadFile file with custom header", (done)->
+    #pathToTempFile = "/tmp/#{Date.now()}-custom-header"
+    #fs.writeFileSync pathToTempFile, STRING_CONTENT_FOR_TESTING2
 
-    filename = "test-file-upload-custom-header"
+    #filename = "test-file-upload-custom-header"
 
-    oss.uploadFile pathToTempFile, filename,
-      "Cache-Control": "max-age=5"
-      "Expires" : Date.now() + 300000
-    , (err) ->
-      should.not.exist(err)
-      done()
+    #oss.uploadFile pathToTempFile, filename,
+      #"Cache-Control": "max-age=5"
+      #"Expires" : Date.now() + 300000
+    #, (err) ->
+      #should.not.exist(err)
+      #done()
 
 
   it "uploadFile multiple files", (done)->
@@ -77,8 +77,11 @@ describe "testing oss", (done)->
 
     oss.uploadFiles tasks, (err)->
       should.not.exist(err)
-      done()
 
+      oss.deleteFolder "test/upload/multiple/", (err)-> done()
+
+
+  return
 
   it "download multiple files", (done)->
 
