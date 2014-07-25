@@ -108,6 +108,9 @@ class OssEasy
   uploadFile : (localFilePath, remoteFilePath, headers, callback) ->
     debuglog "[uploadFile] local:#{localFilePath} -> #{@targetBucket}:#{remoteFilePath}"
 
+    timeKey = "[oss-easy::uploadFile] -> #{remoteFilePath}"
+    console.time timeKey
+
     if _.isFunction(headers) and not callback?
       callback = headers
       headers = null
@@ -120,9 +123,10 @@ class OssEasy
     headers = _.extend({}, headers, @uploaderHeaders) if headers? or @uploaderHeaders?
     args["userMetas"] = headers if headers?
 
-    debuglog "[uploadFile] headers:%j", headers
-    @oss.putObject args, callback
-
+    @oss.putObject args, (err)->
+      console.timeEnd timeKey
+      callback err
+      return
     return
 
   # upload multiple files in a batch
