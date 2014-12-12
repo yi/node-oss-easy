@@ -264,6 +264,31 @@ class OssEasy
       return
     return
 
+  copyFile : (sourceFilePath, destinationFilePath, callback) ->
+    debuglog "[copyFile] #{@targetBucket}:#{sourceFilePath} -> destinationFilePath:#{destinationFilePath}"
+    #console.log "[copyFile] #{@targetBucket}:#{sourceFilePath} -> destinationFilePath:#{destinationFilePath}"
+    args =
+      bucket: @targetBucket
+      object: destinationFilePath
+      srcObject: sourceFilePath
+    @oss.copyObject args, (err) ->
+      callback err
+      return
+    return
+
+  copyFiles : (tasks, callback) ->
+    debuglog "[copyFile] tasks:%j", tasks
+    assert _.isFunction(callback),"missing callback"
+    unless tasks?
+      err = "bad argument, tasks:#{tasks}"
+      console.error "[oss-easy::downloadFileBatch] #{err}"
+      callback(err) if _.isFunction(callback)
+      return
+    sourceFilePaths = _.keys(tasks)
+    async.eachSeries sourceFilePaths, (sourceFilePath, eachCallback) =>
+      @copyFile sourceFilePath, tasks[sourceFilePath], eachCallback
+    , callback
+    return
 
 module.exports=OssEasy
 

@@ -24,7 +24,12 @@ FILE_NAMES= [
   "#{Date.now()}-t2",
   "#{Date.now()}-t3",
   "#{Date.now()}-t4"]
-
+#FILE_NAMES= [
+#  "1234567-t1",
+#  "1234567-t2",
+#  "1234567-t3",
+#  "1234567-t4"]
+#
 describe "testing oss", (done)->
 
   @timeout(10000)
@@ -32,7 +37,6 @@ describe "testing oss", (done)->
   it "writeFile and readFile", (done)->
     filename = "just/a/test"
     oss.writeFile filename, STRING_CONTENT_FOR_TESTING, (err)->
-      #console.log err
       should.not.exist(err)
       oss.readFile filename, 'utf8', (err, data)->
         data.should.equal STRING_CONTENT_FOR_TESTING
@@ -71,12 +75,31 @@ describe "testing oss", (done)->
 
   it "uploadFile multiple files", (done)->
     tasks = {}
-
     for i in [0...4] by 1
       tasks["/tmp/#{FILE_NAMES[i]}"] = "test/upload/multiple/files-#{i}"
       fs.writeFileSync "/tmp/#{FILE_NAMES[i]}", "#{STRING_CONTENT_FOR_TESTING2}-#{i}"
-
     oss.uploadFiles tasks, (err)->
+      should.not.exist(err)
+      done()
+      return
+    return
+
+  it "copy file", (done) ->
+    sourceFilePath =  "test/upload/multiple/files-0"
+    destinationFilePath = "test/upload/multiple/files-00"
+    oss.copyFile sourceFilePath, destinationFilePath, (err) ->
+      should.not.exist(err)
+      done()
+      return
+    return
+
+  it "copy multiple file", (done) ->
+    tasks = {}
+    for i in [0...4] by 1
+      sourceFilePath =  "test/upload/multiple/files-#{i}"
+      destinationFilePath = "test/upload/multiple/files-1#{i}"
+      tasks[sourceFilePath] = destinationFilePath
+    oss.copyFiles tasks,(err) ->
       should.not.exist(err)
       done()
       return
@@ -87,13 +110,10 @@ describe "testing oss", (done)->
     tasks = {}
     for i in [0...4] by 1
       tasks["test/upload/multiple/files-#{i}"] = "/tmp/download-#{FILE_NAMES[i]}"
-
     oss.downloadFiles tasks, (err)->
       should.not.exist(err)
-
       for i in [0...4] by 1
         fs.readFileSync("/tmp/download-#{FILE_NAMES[i]}", 'utf8').should.equal(fs.readFileSync("/tmp/#{FILE_NAMES[i]}", 'utf8'))
-
       done()
       return
 
@@ -112,4 +132,5 @@ describe "testing oss", (done)->
       done()
       return
     return
+
 
