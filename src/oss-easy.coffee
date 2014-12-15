@@ -248,7 +248,7 @@ class OssEasy
         debuglog "ERROR [deleteFolder] error:#{err}"
         callback(err)
         return
-
+      #console.dir result.ListBucketResult.Contents
       filelist = []
       try
         for item in result.ListBucketResult.Contents
@@ -264,6 +264,67 @@ class OssEasy
       return
     return
 
+  copyFile : (sourceFilePath, destinationFilePath, callback) ->
+    debuglog "[copyFile] #{@targetBucket}:#{sourceFilePath} -> destinationFilePath:#{destinationFilePath}"
+    #console.log "[copyFile] #{@targetBucket}:#{sourceFilePath} -> destinationFilePath:#{destinationFilePath}"
+    args =
+      bucket: @targetBucket
+      object: destinationFilePath
+      srcObject: sourceFilePath
+    @oss.copyObject args, (err) ->
+      callback err
+      return
+    return
+
+  copyFiles : (tasks, callback) ->
+    debuglog "[copyFile] tasks:%j", tasks
+    assert _.isFunction(callback),"missing callback"
+    unless tasks?
+      err = "bad argument, tasks:#{tasks}"
+      console.error "[oss-easy::downloadFileBatch] #{err}"
+      callback(err) if _.isFunction(callback)
+      return
+    sourceFilePaths = _.keys(tasks)
+    async.eachSeries sourceFilePaths, (sourceFilePath, eachCallback) =>
+      @copyFile sourceFilePath, tasks[sourceFilePath], eachCallback
+    , callback
+    return
+
+  #复制一个目录下的文件到另一个目录
+  copyFolder: (sourceFolderPath, destinationFolderPath, callback) ->
+    debuglog "[copyFolder] source:#{sourceFolderPath} destination:#{destinationFolderPath}"
+    unless _.isString(sourceFolderPath) and sourceFolderPath and destinationFolderPath and _.isString(destinationFolderPath)
+      err = "bad argument, source:#{sourceFolderPath} destination:#{destinationFolderPath}"
+      debuglog "ERROR [copyFolder] error:#{err}"
+      callback(err)
+      return
+    # list folder
+    args =
+      bucket: @targetBucket
+      prefix : sourceFolderPath
+      delimiter : "/"
+
+    @oss.listObject args, (err, result)=>
+      if err?
+        debuglog "ERROR [copyFolder] error:#{err}"
+        callback(err)
+        return
+
+      #console.dir result.ListBucketResult.Contents
+      tasks = {}
+      try
+        for item in result.ListBucketResult.Contents
+          key = item.Key
+          des = path.join "#{destinationFolderPath}", path.basename(key)
+          tasks[key] = des
+      catch err
+        debuglog "ERROR [copyFolder] error:#{err}"
+        callback(err)
+        return
+      #console.dir tasks
+      @copyFiles tasks, callback
+      return
+    return
 
 module.exports=OssEasy
 
