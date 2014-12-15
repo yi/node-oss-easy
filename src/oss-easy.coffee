@@ -248,7 +248,7 @@ class OssEasy
         debuglog "ERROR [deleteFolder] error:#{err}"
         callback(err)
         return
-
+      #console.dir result.ListBucketResult.Contents
       filelist = []
       try
         for item in result.ListBucketResult.Contents
@@ -288,6 +288,42 @@ class OssEasy
     async.eachSeries sourceFilePaths, (sourceFilePath, eachCallback) =>
       @copyFile sourceFilePath, tasks[sourceFilePath], eachCallback
     , callback
+    return
+
+  #复制一个目录下的文件到另一个目录
+  copyFolder: (sourceFolderPath, destinationFolderPath, callback) ->
+    debuglog "[copyFolder] source:#{sourceFolderPath} destination:#{destinationFolderPath}"
+    unless _.isString(sourceFolderPath) and sourceFolderPath and destinationFolderPath and _.isString(destinationFolderPath)
+      err = "bad argument, source:#{sourceFolderPath} destination:#{destinationFolderPath}"
+      debuglog "ERROR [deleteFolder] error:#{err}"
+      callback(err)
+      return
+    # list folder
+    args =
+      bucket: @targetBucket
+      prefix : sourceFolderPath
+      delimiter : "/"
+
+    @oss.listObject args, (err, result)=>
+      if err?
+        debuglog "ERROR [deleteFolder] error:#{err}"
+        callback(err)
+        return
+
+      #console.dir result.ListBucketResult.Contents
+      tasks = {}
+      try
+        for item in result.ListBucketResult.Contents
+          key = item.Key
+          des = path.join "#{destinationFolderPath}", path.basename(key)
+          tasks[key] = des
+      catch err
+        debuglog "ERROR [deleteFolder] error:#{err}"
+        callback(err)
+        return
+      #console.dir tasks
+      @copyFiles tasks, callback
+      return
     return
 
 module.exports=OssEasy

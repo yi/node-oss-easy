@@ -105,11 +105,19 @@ describe "testing oss", (done)->
       return
     return
 
+  it "capy folder", (done) ->
+    oss.copyFolder "test/upload/multiple/","test/upload/multiple2/", (err) ->
+      should.not.exist err
+      done()
+      return
+    return
+
 
   it "download multiple files", (done)->
     tasks = {}
     for i in [0...4] by 1
-      tasks["test/upload/multiple/files-#{i}"] = "/tmp/download-#{FILE_NAMES[i]}"
+      #tasks["test/upload/multiple/files-#{i}"] = "/tmp/download-#{FILE_NAMES[i]}"
+      tasks["test/upload/multiple2/files-#{i}"] = "/tmp/download-#{FILE_NAMES[i]}"
     oss.downloadFiles tasks, (err)->
       should.not.exist(err)
       for i in [0...4] by 1
@@ -128,8 +136,10 @@ describe "testing oss", (done)->
 
   it "delete a folder", (done)->
     oss.deleteFolder "test/upload/multiple/", (err)->
-      should.not.exist(err)
-      done()
+      oss.deleteFolder "test/upload/multiple2/", (err)->
+        should.not.exist(err)
+        done()
+        return
       return
     return
 
