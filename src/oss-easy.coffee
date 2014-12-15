@@ -295,7 +295,7 @@ class OssEasy
     debuglog "[copyFolder] source:#{sourceFolderPath} destination:#{destinationFolderPath}"
     unless _.isString(sourceFolderPath) and sourceFolderPath and destinationFolderPath and _.isString(destinationFolderPath)
       err = "bad argument, source:#{sourceFolderPath} destination:#{destinationFolderPath}"
-      debuglog "ERROR [deleteFolder] error:#{err}"
+      debuglog "ERROR [copyFolder] error:#{err}"
       callback(err)
       return
     # list folder
@@ -306,7 +306,7 @@ class OssEasy
 
     @oss.listObject args, (err, result)=>
       if err?
-        debuglog "ERROR [deleteFolder] error:#{err}"
+        debuglog "ERROR [copyFolder] error:#{err}"
         callback(err)
         return
 
@@ -318,7 +318,7 @@ class OssEasy
           des = path.join "#{destinationFolderPath}", path.basename(key)
           tasks[key] = des
       catch err
-        debuglog "ERROR [deleteFolder] error:#{err}"
+        debuglog "ERROR [copyFolder] error:#{err}"
         callback(err)
         return
       #console.dir tasks
