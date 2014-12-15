@@ -1,7 +1,7 @@
 {
   "name": "oss-easy",
   "description": "An aliyun oss service client for NodeJS, provides batch processing, exposes api more like nodejs.fs. 阿里云 OSS 服务的SDK，提供简单好用的API接口，支持批量操作处理",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "homepage": "https://github.com/yi/node-oss-easy",
   "author": {
     "name": "yi",
