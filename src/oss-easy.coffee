@@ -281,7 +281,7 @@ class OssEasy
     assert _.isFunction(callback),"missing callback"
     unless tasks?
       err = "bad argument, tasks:#{tasks}"
-      console.error "[oss-easy::downloadFileBatch] #{err}"
+      console.error "[oss-easy::copyFiles] #{err}"
       callback(err) if _.isFunction(callback)
       return
     sourceFilePaths = _.keys(tasks)
@@ -325,6 +325,8 @@ class OssEasy
       @copyFiles tasks, callback
       return
     return
+
+  setUploaderHeaders: (uploaderHeaders) -> @uploaderHeaders = uploaderHeaders
 
 module.exports=OssEasy
 
