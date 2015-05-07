@@ -45,6 +45,7 @@ class OssEasy
     ossOptions['timeout'] = ossOptions['timeout'] || 5 * 60 * 1000
     if ossOptions.uploaderHeaders?
       @uploaderHeaders = ossOptions.uploaderHeaders
+      @contentType = @uploaderHeaders.contentType if @uploaderHeaders.contentType
       delete ossOptions['uploaderHeaders']
 
     debuglog "[constructor] bucket: %j, ossOptions:%j", @targetBucket, ossOptions
@@ -119,6 +120,7 @@ class OssEasy
       bucket: @targetBucket
       object: remoteFilePath
       srcFile: localFilePath
+      contentType:@contentType
 
     headers = _.extend({}, headers, @uploaderHeaders) if headers? or @uploaderHeaders?
     args["userMetas"] = headers if headers?
@@ -327,6 +329,9 @@ class OssEasy
     return
 
   setUploaderHeaders: (uploaderHeaders) -> @uploaderHeaders = uploaderHeaders
+
+  setContentType: (contentType) -> @contentType = contentType
+
 
 module.exports=OssEasy
 
