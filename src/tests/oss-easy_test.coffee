@@ -6,7 +6,7 @@ path = require "path"
 config = require "./config"
 
 
-STRING_CONTENT_FOR_TESTING = "just a piece of data"
+STRING_CONTENT_FOR_TESTING = "hahaaha just a piece of data"
 
 STRING_CONTENT_FOR_TESTING2 = "222 just a piece of data 222"
 
@@ -14,8 +14,8 @@ ossOptions =
   accessKeyId : config.accessKeyId
   accessKeySecret : config.accessKeySecret
   bucket : config.bucket
-  uploaderHeaders :
-    "Content-disposition" : "attachment;filename=whatever.gif"
+  #uploaderHeaders :
+    #"Content-disposition" : "attachment;filename=whatever.gif"
 
 oss = new ossEasy(ossOptions)
 
@@ -35,10 +35,11 @@ describe "testing oss", (done)->
   @timeout(10000)
 
   it "writeFile and readFile", (done)->
-    filename = "just/a/test"
+    filename = "just/a/test.json"
     oss.writeFile filename, STRING_CONTENT_FOR_TESTING, (err)->
       should.not.exist(err)
       oss.readFile filename, 'utf8', (err, data)->
+        console.log "[readFile] data:#{data}"
         data.should.equal STRING_CONTENT_FOR_TESTING
         done()
 
@@ -125,13 +126,13 @@ describe "testing oss", (done)->
       done()
       return
 
-  it "delete file", (done)->
-    remoteFilePath = "just/a/test"
-    oss.deleteFile remoteFilePath, (err)->
-      should.not.exist(err)
-      done()
-      return
-    return
+  #it "delete file", (done)->
+    #remoteFilePath = "just/a/test"
+    #oss.deleteFile remoteFilePath, (err)->
+      #should.not.exist(err)
+      #done()
+      #return
+    #return
 
 
   it "delete a folder", (done)->

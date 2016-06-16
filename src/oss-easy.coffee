@@ -43,6 +43,8 @@ class OssEasy
     assert @targetBucket, "missing bucket name"
 
     ossOptions['timeout'] = ossOptions['timeout'] || 5 * 60 * 1000
+    ossOptions.port or= 80
+
     if ossOptions.uploaderHeaders?
       @uploaderHeaders = ossOptions.uploaderHeaders
       @contentType = @uploaderHeaders.contentType if @uploaderHeaders.contentType
