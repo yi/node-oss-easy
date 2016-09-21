@@ -74,6 +74,18 @@ describe "testing oss", (done)->
       return
 
 
+
+  it "transport file", (done)->
+    url = "http://asset-image.weixinzhongxin.com/temp_img_resize/2.pic_hd.jpg"
+    arr = url.split '/'
+    remoteFilePath = "oss-easy-test/transport/#{arr[arr.length - 1]}"
+    pathToTempFile2 = "/tmp/#{Date.now()}-back"
+    oss.transport url, remoteFilePath, (err)->
+      should.not.exist(err)
+      oss.downloadFile remoteFilePath, pathToTempFile2, (err, data)->
+        should.not.exist(err)
+        done()
+
   it "uploadFile multiple files", (done)->
     tasks = {}
     for i in [0...4] by 1
@@ -106,25 +118,25 @@ describe "testing oss", (done)->
       return
     return
 
-  it "capy folder", (done) ->
-    oss.copyFolder "test/upload/multiple/","test/upload/multiple2/", (err) ->
-      should.not.exist err
-      done()
-      return
-    return
+  #it "capy folder", (done) ->
+    #oss.copyFolder "test/upload/multiple/","test/upload/multiple2/", (err) ->
+      #should.not.exist err
+      #done()
+      #return
+    #return
 
 
-  it "download multiple files", (done)->
-    tasks = {}
-    for i in [0...4] by 1
-      #tasks["test/upload/multiple/files-#{i}"] = "/tmp/download-#{FILE_NAMES[i]}"
-      tasks["test/upload/multiple2/files-#{i}"] = "/tmp/download-#{FILE_NAMES[i]}"
-    oss.downloadFiles tasks, (err)->
-      should.not.exist(err)
-      for i in [0...4] by 1
-        fs.readFileSync("/tmp/download-#{FILE_NAMES[i]}", 'utf8').should.equal(fs.readFileSync("/tmp/#{FILE_NAMES[i]}", 'utf8'))
-      done()
-      return
+  #it "download multiple files", (done)->
+    #tasks = {}
+    #for i in [0...4] by 1
+      ##tasks["test/upload/multiple/files-#{i}"] = "/tmp/download-#{FILE_NAMES[i]}"
+      #tasks["test/upload/multiple2/files-#{i}"] = "/tmp/download-#{FILE_NAMES[i]}"
+    #oss.downloadFiles tasks, (err)->
+      #should.not.exist(err)
+      #for i in [0...4] by 1
+        #fs.readFileSync("/tmp/download-#{FILE_NAMES[i]}", 'utf8').should.equal(fs.readFileSync("/tmp/#{FILE_NAMES[i]}", 'utf8'))
+      #done()
+      #return
 
   #it "delete file", (done)->
     #remoteFilePath = "just/a/test"
@@ -135,13 +147,13 @@ describe "testing oss", (done)->
     #return
 
 
-  it "delete a folder", (done)->
-    oss.deleteFolder "test/upload/multiple/", (err)->
-      oss.deleteFolder "test/upload/multiple2/", (err)->
-        should.not.exist(err)
-        done()
-        return
-      return
-    return
+  #it "delete a folder", (done)->
+    #oss.deleteFolder "test/upload/multiple/", (err)->
+      #oss.deleteFolder "test/upload/multiple2/", (err)->
+        #should.not.exist(err)
+        #done()
+        #return
+      #return
+    #return
 
 

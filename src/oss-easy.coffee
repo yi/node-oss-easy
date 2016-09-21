@@ -13,6 +13,7 @@ async = require "async"
 path = require "path"
 debuglog = require("debug")("oss-easy")
 assert = require "assert"
+wget = require('node-wget')
 
 generateRandomId = ->
   return "#{(Math.random() * 36 >> 0).toString(36)}#{(Math.random() * 36 >> 0).toString(36)}#{Date.now().toString(36)}"
@@ -95,7 +96,7 @@ class OssEasy
       bucket: @targetBucket
       object: remoteFilePath
       srcFile: data
-      contentType : contentType
+      contentType : (headers and headers.contentType) || @contentType || contentType
 
     headers = _.extend({}, headers, @uploaderHeaders) if headers? or @uploaderHeaders?
     args["userMetas"] = headers if headers?
@@ -122,7 +123,7 @@ class OssEasy
       bucket: @targetBucket
       object: remoteFilePath
       srcFile: localFilePath
-      contentType:@contentType
+      contentType : @contentType
 
     headers = _.extend({}, headers, @uploaderHeaders) if headers? or @uploaderHeaders?
     args["userMetas"] = headers if headers?
@@ -130,6 +131,24 @@ class OssEasy
     @oss.putObject args, (err)->
       console.timeEnd timeKey
       callback err
+      return
+    return
+
+
+  # transport a remote file from url to oss bucket
+  transport : (url, remoteFilePath, headers, callback)->
+    debuglog "[transport] url:#{url} -> #{@targetBucket}:#{remoteFilePath}"
+
+    pathToTempFile = path.join "/tmp/", generateRandomId()
+
+    options =
+      url:url
+      dest: pathToTempFile
+      timeout: 60 *1000
+
+    wget options, (err)=>
+      return callback?(err) if err?
+      @uploadFile(pathToTempFile, remoteFilePath, headers, callback)
       return
     return
 
