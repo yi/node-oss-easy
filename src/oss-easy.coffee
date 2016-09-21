@@ -191,21 +191,21 @@ class OssEasy
 
 
   # transport a remote file from url to oss bucket
-  transport : (url, remoteFilePath, headers, callback)->
-    debuglog "[transport] url:#{url} -> #{@targetBucket}:#{remoteFilePath}"
+  #transport : (url, remoteFilePath, headers, callback)->
+    #debuglog "[transport] url:#{url} -> #{@targetBucket}:#{remoteFilePath}"
 
-    pathToTempFile = path.join "/tmp/", generateRandomId()
+    #pathToTempFile = path.join "/tmp/", generateRandomId()
 
-    options =
-      url:url
-      dest: pathToTempFile
-      timeout: 60 *1000
+    #options =
+      #url:url
+      #dest: pathToTempFile
+      #timeout: 60 *1000
 
-    wget options, (err)=>
-      return callback?(err) if err?
-      @uploadFile(pathToTempFile, remoteFilePath, headers, callback)
-      return
-    return
+    #wget options, (err)=>
+      #return callback?(err) if err?
+      #@uploadFile(pathToTempFile, remoteFilePath, headers, callback)
+      #return
+    #return
 
   # upload multiple files in a batch
   # @param {Object KV} tasks
