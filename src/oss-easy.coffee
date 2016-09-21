@@ -14,9 +14,18 @@ path = require "path"
 debuglog = require("debug")("oss-easy")
 assert = require "assert"
 wget = require('node-wget')
+UrlParser = require 'url'
 
 generateRandomId = ->
   return "#{(Math.random() * 36 >> 0).toString(36)}#{(Math.random() * 36 >> 0).toString(36)}#{Date.now().toString(36)}"
+
+NOT_PASSABLE_HEAD_FIELS = [
+  'content-Length'
+  'age'
+  'accept-ranges'
+  'connection'
+  'etag'
+]
 
 
 NONSENCE_CALLBACK = ()->
@@ -109,10 +118,55 @@ class OssEasy
   # @param {String} remoteFilePath
   # @param {String} localFilePath
   # @param {Function} callback
-  uploadFile : (localFilePath, remoteFilePath, headers, callback) ->
-    debuglog "[uploadFile] local:#{localFilePath} -> #{@targetBucket}:#{remoteFilePath}"
+  uploadFile : (filePath, remoteFilePath, headers, callback) ->
 
-    timeKey = "[oss-easy::uploadFile] -> #{remoteFilePath}"
+    if _.isFunction(headers) and not callback?
+      callback = headers
+      headers = null
+
+    filePath = String(filePath || '')
+    isLocal = (filePath.indexOf('http://') isnt 0) and (filePath.indexOf('https://') isnt 0)
+    if isLocal
+      unless fs.existsSync(filePath)
+        return callback?("file not found. #{filePath}")
+      return @_uploadFileLocal(filePath, remoteFilePath, headers, callback)
+
+    # transport remote file
+
+    pathToTempFile = path.join "/tmp/", generateRandomId()
+
+    options =
+      url:filePath
+      dest: pathToTempFile
+      timeout: 60 *1000
+
+    wget options, (err, response)=>
+      return callback?(err) if err?
+
+      #headers = _.extend({}, response.headers, headers)
+
+      arr = []
+      for key, value of response.headers
+        if key.toLowerCase() is "content-type"
+          contentType = value
+
+      #for key in arr
+        #delete headers[key]
+
+      #debuglog "[uploadFile] remote headers", headers
+
+      if contentType
+        headers = {'content-type': contentType}
+
+      @_uploadFileLocal(pathToTempFile, remoteFilePath, headers, callback)
+      return
+    return
+
+
+  _uploadFileLocal : (localFilePath, remoteFilePath, headers, callback) ->
+    debuglog "[_uploadFileLocal] local:#{localFilePath} -> #{@targetBucket}:#{remoteFilePath}"
+
+    timeKey = "[oss-easy::_uploadFileLocal] -> #{remoteFilePath}"
     console.time timeKey
 
     if _.isFunction(headers) and not callback?
@@ -129,6 +183,7 @@ class OssEasy
     args["userMetas"] = headers if headers?
 
     @oss.putObject args, (err)->
+      debuglog "[_uploadFileLocal] callback err:", err
       console.timeEnd timeKey
       callback err
       return

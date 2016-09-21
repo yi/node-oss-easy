@@ -80,7 +80,7 @@ describe "testing oss", (done)->
     arr = url.split '/'
     remoteFilePath = "oss-easy-test/transport/#{arr[arr.length - 1]}"
     pathToTempFile2 = "/tmp/#{Date.now()}-back"
-    oss.transport url, remoteFilePath, (err)->
+    oss.uploadFile url, remoteFilePath, (err)->
       should.not.exist(err)
       oss.downloadFile remoteFilePath, pathToTempFile2, (err, data)->
         should.not.exist(err)
